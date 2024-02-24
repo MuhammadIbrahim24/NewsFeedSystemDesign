@@ -1,0 +1,93 @@
+newsfeed
+ranking
+pacelc
+latency <= 2 secods
+
+Database Design:
+User:
+    id
+    name
+
+Page:
+    id
+    name
+    creatorId
+    category
+
+Group:
+    id
+    name
+    creatorId
+    type
+
+
+Connection:
+    id1
+    id2
+
+GroupMembership:
+    userId
+    groupId
+    joindate
+    membershipType
+
+Following
+    userId
+    pageId
+
+Post
+    id
+    postedBy
+    memberId(//if posted within group/page by a member)
+    timestamp
+    content(it will contain mediaId along with content so that while rendering news feed on client side the media can be placed accordingly with the Text)
+
+Media
+    id
+    postId
+    commentId (//if media is posted in a comment)
+    location
+    type
+
+Interaction
+    id
+    postId
+    userId
+    type(//like/comment/share/seen)
+    timestamp
+    content(//in case of comment)
+
+This is a normalized schema for Database Design.
+However, for systems having enormous amount of data being generated and accessed continuosly, we mostly prefer NoSQL databases.
+To use NoSQL Database, we can denormalize the schema as per our needs and access paterns to reduce latency and network cost
+Also, since we are not storing any financial data here, so using a NoSQL database is perfectly
+For aggregations or reportings, we can ingest required data to OpenSearch or any other reporting tool to get the insights
+
+
+Non-functional Requirements:
+===========================
+Scalability:
+To keep the system scalable, our system should be stateless as much as possible. This will help us to direct multiple calls coming from the client to different servers. A load balancer is must if we have multiple servers.
+Using Kubernetes will help us a lot in autoscaling and managing the nodes along with load balancing.
+Also, we may use read replicas for the database to keep the main DB instance load free.
+
+Fault Tolerance:
+For fault tolerance, we must not rely on a single node, be it an authentication server, application server or database server.
+Use optimal number of resources as per the needs.
+Prepare for Disaster Recovery to keep your application running under unanticipated circumstances.
+Create physically separate secondary instances for it.
+
+Low Latency:
+Use Cache to avoid DB calls wherever possible. We can cache top interacted posts to serve the users with minimal latency.
+Another good technology to use here is GraphQL. If correctly implemented, it can give related data with a single call instead of calling multiple REST APIs. We can also use a combination of REST APIs and GraphQL operations to support our system.
+For static content, Content Delivery Network (CDN) should also be used.
+
+Availability:
+Use auto scaling techniques to serve in peek times.
+Multiple servers with load balancer can help to ensure High Availability
+As discussed above, placing your servers in physically separated regions will also help in case of disasters.
+
+Functional Requirements:
+=======================
+As discussed in DB schema we can use joins and queries to get data from Database and show to the user.
+We can use pub/sub mechanism RabbitMQ to enable polling
